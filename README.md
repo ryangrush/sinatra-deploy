@@ -9,11 +9,13 @@ Using a dynamic DNS service we will then manually create or update a DNS name to
 Finally we will use the Ansible playbook to configure the new EC2 instance to act as a simple web server. The Ansible script will also install Ruby, run database migrations, and configure [Caddy](https://caddyserver.com/) to route traffic from our DNS name to a [Thin](https://github.com/macournoyer/thin) server to running Sinatra.
 
 
-* NOTE - This solution is intended to show off a AWS hosted solution but would obviously be overkill for a developer just looking to setup their local machine. I hope to update this solution with a Dockerfile for a local setup time permitting.
+*NOTE -*
+
+*This solution is intended to show off a AWS hosted solution but would obviously be overkill for a developer just looking to setup their local machine. I hope to update this solution with a Dockerfile for a local setup time permitting.*
 
 
 
-## PREREQUISITE
+### PREREQUISITE
 
 - install [Terraform CLI](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 - install [Ansible CLI](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
@@ -21,14 +23,14 @@ Finally we will use the Ansible playbook to configure the new EC2 instance to ac
 - `aws configure`
 
 
-## CLONE REPO
+### CLONE REPO
 
 - visit https://github.com/ryangrush/sinatra-deploy for more information
 - `git clone git@github.com:ryangrush/sinatra-deploy.git`
 - `cd sinatra-deploy`
 
 
-## TERRAFORM
+### TERRAFORM
 
 - `cd terraform/plans/app1`
 - `terraform init`
@@ -36,27 +38,27 @@ Finally we will use the Ansible playbook to configure the new EC2 instance to ac
 - `terraform apply`
 
 
-## KEYS
+### KEYS
 
 - use `ssh-keygen` or an existing public/private keys
 - add the public key output to line 2 of terraform/plans/app1/main.tf
 - add the private key file to ansible/keys/deployer.pem
 
 
-## DNS
+### DNS
 
 - goto https://my.noip.com/#!/dynamic-dns and create new hostname
 - change dns to point to the new public IP
 - update the dns in ansible/roles/caddy/files/Caddyfile to new dns name you created
 
 
-## ANSIBLE
+### ANSIBLE
 
 - `cd ansible/`
 - `ansible-playbook -i inventory/hosts.cfg main.yml`
 
 
-## BROWSER
+### BROWSER
 
 - visit the DNS name you used (i.e. http://rgrush.ddns.net/)
 
@@ -64,7 +66,7 @@ Finally we will use the Ansible playbook to configure the new EC2 instance to ac
 
 # Teardown
 
-## TERRAFORM
+### TERRAFORM
 
 - `cd terraform/plans/app1`
 - `terraform destroy`
