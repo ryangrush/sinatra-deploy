@@ -11,7 +11,7 @@ Finally we will use the Ansible playbook to configure the new EC2 instance to ac
 
 *NOTE -*
 
-*This solution is intended to show off a AWS hosted solution but would obviously be overkill for a developer just looking to setup their local machine. I hope to update this solution with a Dockerfile for a local setup time permitting.*
+*This solution is intended to show off an AWS hosted solution but would obviously be overkill for a developer just looking to setup their local machine. I hope to update this solution with a Dockerfile for a local setup time permitting.*
 
 
 
