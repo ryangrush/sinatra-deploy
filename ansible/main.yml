@@ -1,0 +1,7 @@
+- name: configure server
+  hosts: dev
+
+  roles:
+    - { role: rbenv }
+    - { role: web-app }
+    - { role: caddy }

@@ -1,0 +1,115 @@
+---
+- name: set variable
+  set_fact:
+    web_app_path: /var/www/html
+    user: ubuntu
+    rbenv_version: "2.7.2"
+
+- name: update cache
+  become: true
+  apt:
+    update_cache: true
+
+- name: install packages
+  become: true
+  apt:
+    pkg:
+      - git
+      - git-core
+      - curl
+      - zlib1g-dev
+      - build-essential
+      - libssl-dev
+      - libreadline-dev
+      - libyaml-dev
+      - libsqlite3-dev
+      - sqlite3
+      - libxml2-dev
+      - libxslt1-dev
+      - libcurl4-openssl-dev
+      - libffi-dev
+      - postgresql-contrib
+      - libpq-dev
+      - postgresql-client-common
+
+# rbenv
+- name: check if rbenv already installed
+  stat: path=$HOME/.rbenv/bin/rbenv
+  register: rbenv_found
+  ignore_errors: true
+
+- name: clone rbenv repo
+  git:
+    repo: https://github.com/rbenv/rbenv.git
+    dest: /home/{{ user }}/.rbenv
+    clone: yes
+  when: rbenv_found.stat.exists == false
+
+- name: add path to environment variable
+  lineinfile: dest="/home/{{ user }}/.bashrc" line='export PATH="$HOME/.rbenv/bin:$PATH"' insertafter='# for examples'
+  when: rbenv_found.stat.exists == false
+
+- name: add path to environment variable for login shells
+  raw:  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> /home/{{ user }}/.bashrc
+  when: rbenv_found.stat.exists == false
+
+- name: add shim path to environment variable
+  lineinfile: dest="/home/{{ user }}/.bashrc" line='export PATH="$HOME/.rbenv/shims:$PATH"' insertafter='# for examples'
+  when: rbenv_found.stat.exists == false
+
+- name: add shim path to environment variable for login shells
+  raw:  echo 'export PATH="$HOME/.rbenv/shims:$PATH"' >> /home/{{ user }}/.bashrc
+  when: rbenv_found.stat.exists == false
+
+- name: add rbenv init to bashrc
+  lineinfile: dest="/home/{{ user }}/.bashrc" line='eval "$(rbenv init -)"' insertafter='# for examples'
+  when: rbenv_found.stat.exists == false
+
+- name: add rbenv init to bashrc for login shells
+  raw: echo 'eval "$(rbenv init -)"' >> /home/{{ user }}/.bashrc
+  when: rbenv_found.stat.exists == false
+
+
+# ruby-build
+- name: check if ruby-build already installed
+  stat: path=$HOME/.rbenv/plugins/ruby-build/bin/ruby-build
+  register: ruby_build_found
+  ignore_errors: true
+
+- name: clone ruby-build repo
+  git:
+    repo: https://github.com/rbenv/ruby-build.git
+    dest: /home/{{ user }}/.rbenv/plugins/ruby-build
+    clone: yes
+  when: ruby_build_found.stat.exists == false
+
+- name: add path to environment variable
+  lineinfile: dest="/home/{{ user }}/.bashrc" line='export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' insertafter='# for examples'
+  when: ruby_build_found.stat.exists == false
+
+- name: add path to environment variable for login shells
+  raw: echo 'export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' >> /home/{{ user }}/.bashrc
+  when: ruby_build_found.stat.exists == false
+
+
+# ruby
+- name: check if ruby already installed
+  stat: path=$HOME/.rbenv/shims/ruby
+  register: ruby_found
+  ignore_errors: true
+
+- name: install rbenv
+  shell: "/home/{{ user }}/.rbenv/bin/rbenv install {{ item }}"
+  with_items: "{{ rbenv_version }}"
+  when: ruby_found.stat.exists == false
+
+- name: make rbenv global
+  shell: "/home/{{ user }}/.rbenv/bin/rbenv global {{ item }}"
+  with_items: "{{ rbenv_version }}"
+  when: ruby_found.stat.exists == false
+
+- name: install bundler gem
+  shell: /home/{{ user }}/.rbenv/shims/gem install bundler
+
+- name: rbenv rehash
+  shell: /home/{{ user }}/.rbenv/bin/rbenv rehash

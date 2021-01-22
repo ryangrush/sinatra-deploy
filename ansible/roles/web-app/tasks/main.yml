@@ -1,0 +1,71 @@
+---
+- name: set variable
+  set_fact:
+    web_app_path: /var/www/html
+    user: ubuntu
+    rbenv_version: "2.7.2"
+
+- name: add database name to bashrc
+  lineinfile: dest="/home/{{ user }}/.profile" line="export DB_NAME={{ rds_name }}" insertafter="# for examples"
+
+- name: add database host to profile
+  lineinfile: dest="/home/{{ user }}/.profile" line="export DB_HOST={{ rds_host | replace(':5432', '') }}" insertafter="# for examples"
+
+- name: add database user to profile
+  lineinfile: dest="/home/{{ user }}/.profile" line="export DB_USER={{ rds_user }}" insertafter="# for examples"
+
+- name: add database password to profile
+  lineinfile: dest="/home/{{ user }}/.profile" line="export DB_PASSWORD={{ rds_password }}" insertafter="# for examples"
+
+- name: add database connection string to profile
+  lineinfile: dest="/home/{{ user }}/.profile" line="export RACK_ENV='production'" insertafter="# for examples"
+
+- name: create directory
+  become: true
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+
+- name: update cache
+  become: true
+  apt:
+    update_cache: true
+
+- name: copy over web-app
+  become: true
+  synchronize:
+    src: "{{ playbook_dir }}/../web-app"
+    dest: "{{ web_app_path }}"
+
+- name: change web-app file ownership
+  become: true
+  file:
+    recurse: true
+    owner: "{{ user }}"
+    path: "{{ web_app_path }}/web-app"
+
+- name: bundle install
+  bundler:
+    state: present
+    gemfile: "{{ web_app_path }}/web-app/Gemfile"
+    executable: /home/{{ user }}/.rbenv/shims/bundle
+
+- name: rbenv rehash
+  shell: /home/{{ user }}/.rbenv/bin/rbenv rehash
+
+- name: rake db:migrate
+  shell: . /home/{{ user }}/.profile && rake db:migrate
+  args:
+    chdir: "{{ web_app_path }}/web-app"
+
+- name: remove thin.pid if exists
+  file:
+    path: "{{ web_app_path }}/web-app/tmp/pids/thin.pid"
+    state: absent
+
+- name: rackup
+  shell: . /home/{{ user }}/.profile && thin -R config.ru -p 9292 -d start
+  args:
+    chdir: "{{ web_app_path }}/web-app"
+

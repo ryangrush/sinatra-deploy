@@ -1,0 +1,3 @@
+rgrush.ddns.net {
+  reverse_proxy localhost:9292
+}
