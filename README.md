@@ -64,7 +64,7 @@ Finally we will use the Ansible playbook to configure the new EC2 instance to ac
 
 
 
-# Teardown
+## Teardown
 
 ### TERRAFORM
 
