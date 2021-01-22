@@ -6,7 +6,7 @@ After the AWS resources are stood up our Terraform script dynamically adds the p
 
 Using a dynamic DNS service we will then manually create or update a DNS name to point to the new public IP address.
 
-Finally we will use the Ansible playbook to configure the new EC2 instance to act as a simple web server. The Ansible script will also install Ruby, run database migrations, and configure [Caddy](https://caddyserver.com/) to route traffic from our DNS name to a [Thin](https://github.com/macournoyer/thin) server to running Sinatra.
+Finally we will use the Ansible playbook to configure the new EC2 instance to act as a simple web server. The Ansible script will also install Ruby, run database migrations, and configure [Caddy](https://caddyserver.com/) to route traffic from our DNS name to a [Thin](https://github.com/macournoyer/thin) server running our Sinatra app.
 
 
 *NOTE -*
